@@ -2,6 +2,7 @@ import random
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
+from qtable import QTable as qt
 
 def Create_States_Tuple(lights,oncomings,lefts,rights,next_waypoints) :
     #states = [(light,oncoming,left,right,next_waypoint) for light in lights for oncoming in oncomings \
