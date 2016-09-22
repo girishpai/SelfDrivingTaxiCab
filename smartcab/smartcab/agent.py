@@ -19,7 +19,7 @@ class LearningAgent(Agent):
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
        
         self.gamma = 0.35
-        self.epsilon = 0.1
+        self.epsilon = 0.01
         self.t = 0
         # TODO: Initialize any additional variables here
         valid_actions = [None, 'forward', 'left', 'right']
@@ -49,7 +49,7 @@ class LearningAgent(Agent):
         self.t += 1
         if self.t != 0 : 
             self.alpha = 1 / float(self.t)
-            self.epsilon = 1 / float(self.t)
+            #self.epsilon = 1 / float(self.t)
       
 
 
