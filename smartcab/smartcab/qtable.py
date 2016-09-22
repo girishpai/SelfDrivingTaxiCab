@@ -7,16 +7,14 @@ class QTable :
     """    
     def __init__(self) :
         self.Qtable_dict = {}
-        self.alpha = 0.0
-        self.gamma = 0.0
-
+        
 
     """
     Method : Create_States_Tuple
     Uses a Tuple to represent states. 
     This is done because a dictionary needs the key to be hashable.
     """
-    def Create_States_Tuple(self,lights,oncomings,lefts,rights,next_waypoint) :
+    def Create_States_Tuple(self,lights,oncomings,lefts,rights,next_waypoints) :
 
         states = [(light,oncoming,left,next_waypoint) for light in lights for oncoming in oncomings \
              for left in lefts for next_waypoint in next_waypoints]
@@ -38,7 +36,7 @@ class QTable :
         return match_keys
 
     def Get_Max_Action_For_State(self,state) :
-        match_keys = Get_Keys_With_Matching_State(state)
+        match_keys = self.Get_Keys_With_Matching_State(state)
         best_action = None
         max_value = 0.0
         for key in match_keys :
