@@ -16,8 +16,17 @@ class QTable :
     """
     def Create_States_Tuple(self,lights,oncomings,lefts,rights,next_waypoints) :
 
-        states = [(light,oncoming,left,next_waypoint) for light in lights for oncoming in oncomings \
-             for left in lefts for next_waypoint in next_waypoints]
+        #states = [(light,oncoming,left,next_waypoint) for light in lights for oncoming in oncomings \
+        #    for left in lefts for next_waypoint in next_waypoints]
+
+        #states = [(s1,s2,s3,next_waypoint) for s1 in [True,False] for s2 in [True,False] \
+        #          for s3 in [True,False] for next_waypoint in next_waypoints]
+
+        #states = [(light,oncoming,s1,next_waypoint) for light in lights for oncoming in oncomings \
+        #     for s1 in [True,False] for next_waypoint in next_waypoints]
+
+        states = [(s1,s2,light,next_waypoint) for s1 in [True,False] for s2 in [True,False] \
+                  for light in lights for next_waypoint in next_waypoints]
 
         return states
 

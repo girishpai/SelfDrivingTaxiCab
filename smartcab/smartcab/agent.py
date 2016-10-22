@@ -20,7 +20,7 @@ class LearningAgent(Agent):
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
        
         self.gamma = 0.35
-        self.epsilon = 0.35
+        self.epsilon = 0.6
         self.t = 0
         # TODO: Initialize any additional variables here
         valid_actions = [None, 'forward', 'left', 'right']
@@ -30,7 +30,10 @@ class LearningAgent(Agent):
         valid_right = valid_actions
         valid_oncoming = valid_actions
 
+
+
         states = self.QTable.Create_States_Tuple(valid_light,valid_oncoming,valid_left,valid_right,valid_actions)
+
         
         actions = valid_actions
 
@@ -50,16 +53,23 @@ class LearningAgent(Agent):
         self.alpha = 1.0
         self.t += 1
         if self.t != 0 : 
-            self.alpha = 1 / float(self.t)
+            self.alpha = 1 / float(self.trial_num)
             #self.epsilon = 1 / float(self.t)
 
-        if self.trial_num > 79 :
+        if self.trial_num > 80:
             self.epsilon = 0.0
       
 
 
         # TODO: Update state
-        self.state = (inputs['light'],inputs['oncoming'],inputs['left'],self.next_waypoint)
+        #self.state = (inputs['light'],inputs['oncoming'],inputs['left'],self.next_waypoint)
+
+        
+        Scenario_1 = (inputs['light'] == 'green' and (inputs['oncoming'] == 'forward' or inputs['oncoming'] == 'right'))
+        Scenario_2 = (inputs['light'] == 'red' and inputs['left'] == 'forward')
+        #Scenario_3 = (inputs['light'] == 'red' and inputs['left'] == 'forward')
+        self.state = (Scenario_1,Scenario_2,inputs['light'],self.next_waypoint)
+        #self.state = (inputs['light'],inputs['oncoming'],Scenario_1,self.next_waypoint)
         
         # TODO: Select action according to your policy
 
@@ -84,7 +94,7 @@ def run():
     """Run the agent for a finite number of trials."""
 
     # Set up environment and agent
-    e = Environment(100)  # create environment (also adds some dummy traffic)
+    e = Environment(60)  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent
     e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
@@ -93,7 +103,7 @@ def run():
     sim = Simulator(e, update_delay=0.0001, display=False)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
-    sim.run(n_trials=100)  # run for a specified number of trials
+    sim.run(n_trials=200)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
 
 
