@@ -13,13 +13,14 @@ class LearningAgent(Agent):
     gamma = 0.0
     sim_time = 1.0
     t = 0
+    trial_num = 0
     def __init__(self, env):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
        
         self.gamma = 0.35
-        self.epsilon = 0.01
+        self.epsilon = 0.35
         self.t = 0
         # TODO: Initialize any additional variables here
         valid_actions = [None, 'forward', 'left', 'right']
@@ -39,6 +40,7 @@ class LearningAgent(Agent):
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
+        self.trial_num += 1
 
     def update(self, t):
         # Gather inputs
@@ -50,6 +52,9 @@ class LearningAgent(Agent):
         if self.t != 0 : 
             self.alpha = 1 / float(self.t)
             #self.epsilon = 1 / float(self.t)
+
+        if self.trial_num > 79 :
+            self.epsilon = 0.0
       
 
 
@@ -68,7 +73,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
 
         # TODO: Learn policy based on state, action, reward
-        print "LearningAgent.update(): Sim_time = {}, alpha = {}".format(self.t,self.alpha)
+        print "LearningAgent.update(): Trial Num = {}, Sim_time = {}, alpha = {}".format(self.trial_num,self.t,self.alpha)
         self.QTable.Update_Qtable(self.alpha,self.gamma,reward,self.state,action)
         
         
@@ -79,7 +84,7 @@ def run():
     """Run the agent for a finite number of trials."""
 
     # Set up environment and agent
-    e = Environment()  # create environment (also adds some dummy traffic)
+    e = Environment(100)  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent
     e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
