@@ -11,17 +11,16 @@ class LearningAgent(Agent):
     QTable = qt()
     alpha = 0.0
     gamma = 0.0
-    sim_time = 1.0
-    t = 0
     trial_num = 0
+    epsilon = 0.0
     def __init__(self, env):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
        
         self.gamma = 0.35
-        self.epsilon = 0.35
-        self.t = 0
+        self.epsilon = 0.6
+        
         # TODO: Initialize any additional variables here
         valid_actions = [None, 'forward', 'left', 'right']
 
@@ -30,8 +29,8 @@ class LearningAgent(Agent):
         valid_right = valid_actions
         valid_oncoming = valid_actions
 
-        states = self.QTable.Create_States_Tuple(valid_light,valid_oncoming,valid_left,valid_right,valid_actions)
-        
+        states = self.QTable.Create_States_Tuple(valid_light,valid_actions)
+
         actions = valid_actions
 
         self.QTable.Init_Qtable(states,actions)
@@ -47,19 +46,28 @@ class LearningAgent(Agent):
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
-        self.alpha = 1.0
-        self.t += 1
-        if self.t != 0 : 
-            self.alpha = 1 / float(self.t)
-            #self.epsilon = 1 / float(self.t)
 
-        if self.trial_num > 79 :
+        #For first part of project, comment out once done.
+        #action = random.choice(self.env.valid_actions)
+
+        #Decay alpha
+        self.alpha = 1 / float(self.trial_num)
+
+        # After first 80 trials, make epsilon 0, to make sure the agent chooses action based on QTable. 
+        if self.trial_num > 80:
             self.epsilon = 0.0
       
 
 
         # TODO: Update state
-        self.state = (inputs['light'],inputs['oncoming'],inputs['left'],self.next_waypoint)
+
+        #Required when traffic_light = 'green' and agent needs to take a left. Agent needs to yield to oncoming traffic before taking left.
+        Scenario_1 = (inputs['light'] == 'green' and (inputs['oncoming'] == 'forward' or inputs['oncoming'] == 'right'))
+
+        #Required when traffic_light = 'red' and agent needs to take a right. Agent needs to yiled to left traffic moving forward before taking right. 
+        Scenario_2 = (inputs['light'] == 'red' and inputs['left'] == 'forward')
+        
+        self.state = (Scenario_1,Scenario_2,inputs['light'],self.next_waypoint)
         
         # TODO: Select action according to your policy
 
@@ -73,7 +81,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
 
         # TODO: Learn policy based on state, action, reward
-        print "LearningAgent.update(): Trial Num = {}, Sim_time = {}, alpha = {}".format(self.trial_num,self.t,self.alpha)
+        #print "LearningAgent.update(): Trial Num = {}".format(self.trial_num)
         self.QTable.Update_Qtable(self.alpha,self.gamma,reward,self.state,action)
         
         
@@ -84,7 +92,7 @@ def run():
     """Run the agent for a finite number of trials."""
 
     # Set up environment and agent
-    e = Environment(100)  # create environment (also adds some dummy traffic)
+    e = Environment(50)  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent
     e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
